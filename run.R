@@ -42,8 +42,8 @@ if (length(not_installed)) {
 			"11-generate-dfage.R",
 			"12-generate-qale.R",
 			"13-generate-model_parameters.R",
-			"14-run-incremental-case.R",
-			"15-run-incremental-case-vary.R"
+			"14-run-incremental-case.R" # ,
+			# "15-run-incremental-case-vary.R"
 		)
 	)
 
@@ -55,3 +55,5 @@ if (length(not_installed)) {
 
 	message("Analysis complete. Results are in the 'results/' directory.")
 }
+
+rm(list = ls())

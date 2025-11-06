@@ -105,17 +105,21 @@ parameters <- list(
 	step_decline = 1,
 
 	# LTBI cascade input ------------------------------------------------------
-	#test = c("T-SPOT.TB", "QuantiFERON", "Tuberculin Skin Test (5mm)", "Tuberculin Skin Test (10mm)", "Tuberculin Skin Test (15mm)"),
+	# test = c("T-SPOT.TB", "QuantiFERON", "Tuberculin Skin Test (5mm)", 
+  # "Tuberculin Skin Test (10mm)", "Tuberculin Skin Test (15mm)"),
 	test           = "Tuberculin Skin Test (5mm)", # "C-TB"
 	tpt            = "3HR", #c("3HR", "3HP", "6H"),
 	true_pos_tspo  = 1,
 	true_neg_tspo  = 1,
+  # QFT 
 	true_pos_qft   = 0.99319,
 	true_neg_qft   = 0.9694,
+  # TST 
 	true_pos_tst5  = 1,
 	true_neg_tst5  = 0.70188,
-	true_pos_ctb   = 0.99319,#0.99434,
-	true_neg_ctb   = 0.9694,#0.95706,
+  # CTb
+	true_pos_ctb   = 0.99319, # 0.99434,
+	true_neg_ctb   = 0.9694, # 0.95706,
 	
 	
 	
@@ -124,8 +128,8 @@ parameters <- list(
 	# LTBI Cascade components (choose 0 to 1)
 	tst_return     = 1-0.15,  # Only appplies if using TST test or C-TB 
 	test_2nd       = sqrt(0.45) , # Proportion attends second test appointment, costs staff time
-	tpt_start      = sqrt(0.45), #0.66, # Loutet. changed to Latent tuberculosis testing and treatment programme for migrants
-	tpt_completion = 0.75,#0.95, # Loutet
+	tpt_start      = sqrt(0.45), # Loutet. changed to Latent tuberculosis testing and treatment programme for migrants
+	tpt_completion = 0.75,   #0.95, # Loutet
 
 	# fraction not completing enjoying full benefits
 	tpt_lfup_eff = 0,

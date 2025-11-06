@@ -2,15 +2,45 @@
 # input -------------------------------------------------------------------
 # -------------------------------------------------------------------------
 
+root <- here::here()
+infile_model_parameters <- file.path(root, "output", "model_parameters.qs2")
+model_parameters    <- qs_read(infile_model_parameters)
+
+# cascade params
+uptake_val <- 0.45; increm_val <- 0.2
+# unit price
+price_vals <- seq(10,26,by=2)
+# C-Tb sensit/specif
+# 
+pars_true_pos_ctb <- 1 # p$true_pos_ctb 
+# 
+pars_true_neg_ctb <-  1 # p$true_neg_ctb 
+
+# create folder names
+  # string abt unit price
+  price_str <- ifelse(length(price_vals)>1,
+            paste0("_pricemin",
+                min(price_vals),"max",max(price_vals),"incr",unique(diff(price_vals))),
+            paste0("_price",unique(price_vals)) )
+  # string abt test performance
+  test_perf_str <- ifelse(pars_true_pos_ctb>model_parameters$model_pars$true_pos_qft,
+                          "_ctb_high_sensit", "")
+  print(test_perf_str)
+  # print(paste0("pars_true_pos_ctb:", pars_true_pos_ctb))
+  # print(paste0("model_parameters$true_pos_qft:", model_parameters$model_pars$true_pos_qft))
+  # subfolder name together
+  subfolder_name <- with( list(uptake_val,increm_val,price_vals), 
+            paste0("uptakeval",uptake_val,"incr",increm_val, price_str, test_perf_str))
+    # format(Sys.time(), "%Y_%m_%d_%H_%M")
+
   # Input
-  root                    <- here::here()
-  infile_model_parameters <- file.path(root, "output", "model_parameters.qs2")
   infile_pars_discrete2   <- file.path(root, "output", "pars_cohort_discrete2_new.qs2")
   infile_model_0          <- file.path(root, "models", "cohort_discrete0_new.R")
   infile_model_1          <- file.path(root, "models", "cohort_discrete1_new.R")
   infile_model_2          <- file.path(root, "models", "cohort_discrete2_new.R")
   infile_model_3          <- file.path(root, "models", "cohort_discrete3_new.R")
-  out_folder              <- file.path(root, "results")
+  out_folder <- file.path(root, "results", subfolder_name )
+  dir.create(out_folder)
   
   # Packages
   source(file.path(root, "R", "modify_attach.R"))
@@ -27,14 +57,16 @@
 
 # Simulate Main function --------------------------------------------------
 
-simulate_main <- function(generator, pars, samples, modeltype) {
+simulate_main <- function(generator, pars, samples, 
+                  modeltype, price_range=price_vals, # seq(8,24,2),
+                  overall_uptake=uptake_val      ) {
   
   
   t_hor <- pars$t_hor
   t_end <- pars$t_end
   igra <-  c("C-TB")
   ptbld_vals <- c(1)
-  c_ctb<- seq(8,24,2)
+  c_ctb <- price_range # seq(8,24,2)
   
   
   # Create memory to allocate values
@@ -68,7 +100,7 @@ simulate_main <- function(generator, pars, samples, modeltype) {
       
       
       
-      
+    # overall_uptake <- 0.64
     
     pars$test <- ig  # Set test
     pars0$test <- "QuantiFERON"  # Set test
@@ -77,8 +109,8 @@ simulate_main <- function(generator, pars, samples, modeltype) {
     samples0$sim_test2_pos_cost <- samples$sim_test2_pos_cost_qfn
     pars0$true_pos <- pars$true_pos_qft
     pars0$true_neg <- pars$true_neg_qft
-    pars0$p_2nd  <- sqrt(0.45)
-    pars0$tpt_start<- sqrt(0.45)
+    pars0$p_2nd  <- sqrt(overall_uptake)
+    pars0$tpt_start<- sqrt(overall_uptake)
     
     # true positives and negatives according to test-------------------
     if (ig == "T-SPOT.TB"){
@@ -108,8 +140,8 @@ simulate_main <- function(generator, pars, samples, modeltype) {
         samples$sim_test_cost      <- samples$sim_test_staff_cost_ctb + ic
       samples$sim_test2_neg_cost     <- samples$sim_test2_neg_cost_ctb
       samples$sim_test2_pos_cost     <- samples$sim_test2_pos_cost_ctb
-      pars$true_pos <- pars$true_pos_ctb
-      pars$true_neg <- pars$true_neg_ctb
+      pars$true_pos <- pars_true_pos_ctb
+      pars$true_neg <- pars_true_neg_ctb
       pars$p_2nd  <- pars$tst_return
     }  else {
       stop("Currently we are only considering T-SPOT and QuantiFERON.")
@@ -184,7 +216,10 @@ simulate_main <- function(generator, pars, samples, modeltype) {
 # Simulate cohort function ------------------------------------------------
 
 
-simulate_cohort <- function(generator, input0,input, samples0,samples) {
+simulate_cohort <- function(generator, 
+                    input0,input, 
+                    samples0,samples) {
+  
   t_end <- input$t_end
   t     <- seq(1, t_end, length.out = t_end)
   n     <- length(samples$sim_tb_qol)
@@ -513,7 +548,7 @@ simulate_cohort <- function(generator, input0,input, samples0,samples) {
 # Get ICER function -------------------------------------------------------
 
 
-get_icer<-function(par, sims, plot_switch = 1){
+get_icer <- function(par, sims, plot_switch=1){
   
   
   
@@ -534,7 +569,7 @@ get_icer<-function(par, sims, plot_switch = 1){
   # ICER --------------------------------------------------------------------
   qaly_base  <- colCumsums(base$qaly_all)
   qaly_itv   <- colCumsums(itv$qaly_all)
-  delta_qaly <- qaly_base - qaly_itv # Note we do baseline - intervention because we are using QALY losses not waly gains
+  delta_qaly <- qaly_base - qaly_itv # Note we do baseline - intervention because we are using QALY losses not qaly gains
   
   # Briggs Method=(not in use)============================
   # Base QALYs
@@ -716,13 +751,13 @@ get_icer<-function(par, sims, plot_switch = 1){
     meanICER        = meanICER
   )
   
-}
+} # end of get_icer function
 
+  
 
 # -------------------------------------------------------------------------
 # Load parameters ---------------------------------------------------------
 # -------------------------------------------------------------------------
-model_parameters    <- qs_read(infile_model_parameters)
 pars_discrete2      <- qs_read(infile_pars_discrete2)
 nsamples            <- model_parameters$model_pars$n_samples
 
@@ -742,10 +777,11 @@ s <- model_parameters$samples
 # Go through scenarios ----------------------------------------------------
 
 # cascade combinations
-tpt_start=seq(0.45,1,by=0.01)
-test_2nd =seq(0.45,1,by=0.01)
 
-casc_scens<-data.frame(
+tpt_start=seq(uptake_val,1,by=increm_val)
+test_2nd =seq(uptake_val,1,by=increm_val)
+
+casc_scens <- data.frame(
   tpt_start= rep( tpt_start, each = length(test_2nd)) ,
   test_2nd = rep( test_2nd , length(tpt_start))
 )
@@ -773,26 +809,23 @@ for(i in seq_along(model_files)) {
   cost_tab_list <- vector("list", nrow(casc_scens)  )
   inb_tab_list  <- vector("list", nrow(casc_scens)  )
   
-  
   ii<-0
   
-  
-  
-  
   for(jj in 1:nrow(casc_scens)){
-    ii<-ii+1
+    ii <- ii+1
     
-    print(ii)
+    if (ii %% 5 == 0) { print(paste0(ii,"/",nrow(casc_scens))) }
     
-    p$tpt_start     <-casc_scens$tpt_start[jj]
-    p$tst_return    <-casc_scens$test_2nd[jj]
+    p$tpt_start <- casc_scens$tpt_start[jj]
+    p$tst_return <- casc_scens$test_2nd[jj]
     
     # Call main function
-    runs_main <- simulate_main(cohort_generator, p, s, modeltype)
+    runs_main <- simulate_main(cohort_generator, p, s, modeltype, 
+                        price_range=price_vals, overall_uptake=uptake_val )
     
     
     #INB = (ΔE × K) − ΔC
-    threshold<- 20000
+    threshold <- 20000
     
     tab<-as.data.frame(runs_main$tab)
     icer<-as.data.frame(runs_main$icer_sims)
@@ -971,10 +1004,11 @@ if(nsamples==1){
   qaly_mat<-qaly_mat[with(qaly_mat, order(model_struct,tpt_effect, igra, ptbld, test_2nd, start)), ]
   file_name<-paste0("all_qaly_incremental_case.csv")
   write.csv( qaly_mat,file.path(out_folder, file_name), row.names = FALSE)
-  
-  
-  
-  
-  
-  
+
 }
+
+# move QS2 files into a sub-sub-folder
+dir.create(file.path("output",subfolder_name), showWarnings=F)
+file.rename(list.files("output",pattern="\\.qs2$", full.names=T),
+            file.path("output",subfolder_name,
+              basename(list.files("output", pattern="\\.qs2$", full.names=T))))
