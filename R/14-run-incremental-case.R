@@ -7,31 +7,29 @@ infile_model_parameters <- file.path(root, "output", "model_parameters.qs2")
 model_parameters    <- qs_read(infile_model_parameters)
 
 # cascade params
-uptake_val <- 0.45; increm_val <- 0.02
+uptake_val <- 0.45; increm_val <- 0.01
 # unit price
-price_vals <- seq(15,25,by=2.5)
-# C-Tb sensit/specif
-# 
+price_vals <- seq(10,26,by=4)
+# C-Tb sensit/specif: TRUE positive/negative rates
 pars_true_pos_ctb <- model_parameters$model_pars$true_pos_ctb #
 pars_true_neg_ctb <- model_parameters$model_pars$true_neg_ctb #
 
-# create folder names
+# differential return rate for negative result patients. By default set to 1
+neg_test_diff_return <- 1
+val_sim_test2_neg_cost_ctb <- model_parameters$samples$sim_test2_neg_cost_ctb*neg_test_diff_return
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+  # create folder names
   # string abt unit price
   price_str <- ifelse(length(price_vals)>1,
             paste0("_pricemin",
                 min(price_vals),"max",max(price_vals),"incr",unique(diff(price_vals))),
             paste0("_price",unique(price_vals)) )
   # string abt test performance
-  test_perf_str <- ifelse(pars_true_pos_ctb>model_parameters$model_pars$true_pos_qft,
-                          "_ctb_high_sensit", "")
+  test_perf_str <- ifelse(pars_true_pos_ctb>model_parameters$model_pars$true_pos_qft,                        "_ctb_high_sensit", "")
   print(test_perf_str)
-  # print(paste0("pars_true_pos_ctb:", pars_true_pos_ctb))
-  # print(paste0("model_parameters$true_pos_qft:", model_parameters$model_pars$true_pos_qft))
   
-  print("negative 2nd test CTB cost:")
-  # print(model_parameters$samples$sim_test2_neg_cost_ctb)
-  neg_test_diff_return <- 0
-  val_sim_test2_neg_cost_ctb <- model_parameters$samples$sim_test2_neg_cost_ctb*neg_test_diff_return
+  # create string if negative test return rate is different
   neg_test_ret_str <- ifelse(neg_test_diff_return==1,
               "",paste0("_negretrate",neg_test_diff_return))
   
@@ -42,6 +40,8 @@ pars_true_neg_ctb <- model_parameters$model_pars$true_neg_ctb #
               test_perf_str, neg_test_ret_str))
     # format(Sys.time(), "%Y_%m_%d_%H_%M")
 
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+  
   # Input
   infile_pars_discrete2   <- file.path(root, "output", "pars_cohort_discrete2_new.qs2")
   infile_model_0          <- file.path(root, "models", "cohort_discrete0_new.R")
