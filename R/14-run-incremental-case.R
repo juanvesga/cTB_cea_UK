@@ -23,7 +23,8 @@ val_sim_test2_neg_cost_ctb <- model_parameters$samples$sim_test2_neg_cost_ctb*ne
   # string abt unit price
   price_str <- ifelse(length(price_vals)>1,
             paste0("_pricemin",
-                min(price_vals),"max",max(price_vals),"incr",unique(diff(price_vals))),
+                min(price_vals),"max",max(price_vals),
+                "incr",unique(diff(price_vals))),
             paste0("_price",unique(price_vals)) )
   # string abt test performance
   test_perf_str <- ifelse(pars_true_pos_ctb>model_parameters$model_pars$true_pos_qft,                        "_ctb_high_sensit", "")
