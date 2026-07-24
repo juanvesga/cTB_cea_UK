@@ -1,6 +1,6 @@
 # README
 
-Script to run cost-effectiveness analysis comparing IGRA and C-Tb testing for latent TB infection (LTBI), used for the [article](https://docs.google.com/document/d/1Neh9EVPZR6WmqFKuLN1wQFS35cu_wnxDa80BpOQXrgI/). The model is from [Vesga 2025], adapted for C-Tb.
+Script to run cost-effectiveness analysis comparing IGRA and C-Tb testing for latent TB infection (LTBI), used for this [article](). The model is from [Vesga 2025], adapted for C-Tb.
 
 ## THIS MODEL WAS REVISED, with TREATMENT COSTS AND OTHER PARAMETERS CHANGED. THE UPDATED VERSION IS AT THE REPO [cTB_cea_UK2026](https://github.com/juanvesga/cTB_cea_UK2026)
 
